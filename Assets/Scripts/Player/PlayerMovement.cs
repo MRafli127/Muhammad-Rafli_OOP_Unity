@@ -1,51 +1,90 @@
+using System.Collections;
+using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] private Vector2 maxSpeed;
-    [SerializeField] private Vector2 timeToFullSpeed;
-    [SerializeField] private Vector2 timeToStop;
-    [SerializeField] private Vector2 stopClamp;
+    [SerializeField] Vector2 maxSpeed;
+    [SerializeField] Vector2 timeToFullSpeed;
+    [SerializeField] Vector2 timeToStop;
+    [SerializeField] Vector2 stopClamp;
+    Vector2 moveDirection;
+    Vector2 moveVelocity;
+    Vector2 moveFriction;
+    Vector2 stopFriction;
+    Rigidbody2D rb;
 
-    private Vector2 moveDirection;
-    private Vector2 moveVelocity;
-    private Vector2 moveFriction;
-    private Vector2 stopFriction;
-    private Rigidbody2D rb;
+    [SerializeField] Vector2 Vertical_Boundary;
+    [SerializeField] Vector2 Horizontal_Boundary;
 
-    private void Start() {
+    void Start() {
         rb = GetComponent<Rigidbody2D>();
-        if (rb == null){
-            Debug.LogError("Rigidbody2D component not found on PlayerMovement GameObject.");
-        }
-        moveVelocity = 2 * maxSpeed / timeToFullSpeed;
-        moveFriction = -2 * maxSpeed / (timeToFullSpeed * timeToFullSpeed);
-        stopFriction = -2 * maxSpeed / (timeToStop * timeToStop);
+        
+        moveVelocity = 2 * maxSpeed/timeToFullSpeed;
+
+        moveFriction = 2 * maxSpeed/(timeToFullSpeed*timeToFullSpeed);
+        
+        stopFriction = -2 * maxSpeed/(timeToStop*timeToStop);
     }
 
     public void Move() {
-        moveDirection = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        Vector2 velocity = moveDirection * moveVelocity * Time.fixedDeltaTime;
+
+        float inputX = 0;
+        float inputY = 0;
+
+        if(Input.GetKey(KeyCode.W)){
+            inputY += 1;
+        }
+        if(Input.GetKey(KeyCode.S)){
+            inputY -= 1;
+        }
+        if(Input.GetKey(KeyCode.D)){
+            inputX += 1;
+        }
+        if(Input.GetKey(KeyCode.A)){
+            inputX -= 1;
+        }
+
+        moveDirection = new Vector2(inputX, inputY).normalized;
+
+        Vector2 targetVelocity = moveDirection * maxSpeed;
+
+        if(moveDirection != Vector2.zero){
+            rb.velocity = Vector2.MoveTowards(rb.velocity, targetVelocity, moveVelocity.magnitude * Time.fixedDeltaTime);
+        }
+        else{
+            rb.velocity = Vector2.MoveTowards(rb.velocity, Vector2.zero, stopFriction.magnitude * Time.fixedDeltaTime);
+        }
+
 
         rb.velocity = new Vector2(
-            Mathf.Clamp(rb.velocity.x + velocity.x, -maxSpeed.x, maxSpeed.x),
-            Mathf.Clamp(rb.velocity.y + velocity.y, -maxSpeed.y, maxSpeed.y)
+            Mathf.Clamp(rb.velocity.x, -stopClamp.x, stopClamp.x), 
+            Mathf.Clamp(rb.velocity.y, -stopClamp.y, stopClamp.y)
         );
 
-        rb.velocity += GetFriction() * Time.fixedDeltaTime;
-
-        if (Mathf.Abs(rb.velocity.x) < stopClamp.x) rb.velocity = new Vector2(0, rb.velocity.y);
-        if (Mathf.Abs(rb.velocity.y) < stopClamp.y) rb.velocity = new Vector2(rb.velocity.x, 0);
+        MoveBound();
     }
 
-    private Vector2 GetFriction() {
-        return new Vector2(
-            moveDirection.x != 0 ? moveFriction.x : stopFriction.x,
-            moveDirection.y != 0 ? moveFriction.y : stopFriction.y
+
+    public Vector2 GetFriction() {
+        if(moveDirection != Vector2.zero){
+            return moveFriction;
+        }
+        else{
+            return stopFriction;
+        }
+        
+    }
+
+    public void MoveBound() {
+        rb.position = new Vector2(
+            Mathf.Clamp(rb.position.x, -Horizontal_Boundary.x, Horizontal_Boundary.x), 
+            Mathf.Clamp(rb.position.y, -Vertical_Boundary.y, Vertical_Boundary.y)
         );
     }
 
     public bool IsMoving() {
-        return rb.velocity.magnitude > 0.1f;
+        return moveDirection != Vector2.zero;
     }
 }
