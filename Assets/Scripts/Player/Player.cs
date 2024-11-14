@@ -1,51 +1,61 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public static Player instance;
-    private PlayerMovement playerMovement;
-    private Animator animator;
+    // This for getting the instace of Player Singleton
+    public static Player Instance { get; private set; }
 
+    // Getting the PlayerMovement methods
+    PlayerMovement playerMovement;
+    // Animator
+    Animator animator;
+
+
+    // Key for Singleton
     void Awake()
     {
-        if (instance == null)
+        if (Instance != null && Instance != this)
         {
-            instance = this;
-            if (transform.parent != null)
-            {
-                transform.SetParent(null);
-            }
-            DontDestroyOnLoad(gameObject);
+            Destroy(this);
+            return;
         }
-        else if (instance != null)
-        {
-            Destroy(gameObject);
-        }
+
+        Instance = this;
+
+        DontDestroyOnLoad(gameObject);
     }
 
+    // Getting Component
     void Start()
     {
+        // Get PlayerMovement components
         playerMovement = GetComponent<PlayerMovement>();
 
-        GameObject engineEffect = GameObject.Find("EngineEffect");
-        if (engineEffect != null)
-        {
-            animator = engineEffect.GetComponent<Animator>();
-        }
+        // Get Animator components
+       // animator = GameObject.Find("EngineEffects").GetComponent<Animator>();
     }
 
+    // Using FixedUpdate to Move because of physics
     void FixedUpdate()
     {
-        playerMovement?.Move();
+        playerMovement.Move();
     }
 
+    // LateUpdate for animation related
     void LateUpdate()
     {
-        if (animator != null && playerMovement != null)
+        playerMovement.MoveBound();
+        animator.SetBool("IsMoving", playerMovement.IsMoving());
+    }
+
+    private WeaponPickup currentWeaponPickup;
+
+    public void SwitchWeapon(Weapon newWeapon, WeaponPickup newWeaponPickup)
+    {
+        if (currentWeaponPickup != null)
         {
-            animator.SetBool("IsMoving", playerMovement.IsMoving());
+            currentWeaponPickup.PickupHandler(true);  // Make the previous weapon pickup visible again
         }
+        currentWeaponPickup = newWeaponPickup;
     }
 }
