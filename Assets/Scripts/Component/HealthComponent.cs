@@ -4,26 +4,27 @@ using UnityEngine;
 
 public class HealthComponent : MonoBehaviour
 {
-    public float maxHealth = 100;
-    private float health;
+    public int maxHealth = 10;
 
-    // Start is called before the first frame update
-    void Start()
+    private int health;
+
+    void Awake()
     {
         health = maxHealth;
     }
 
-    public float getHealth
+    public void Subtract(int amount)
     {
-        get { return health; }
-    }
+        health -= amount;
 
-    public void Subtract(float value)
-    {
-        health -= value;
-        if (health < 0)
+        if (health <= 0)
         {
             Destroy(gameObject);
         }
+    }
+
+    public int GetHealth()
+    {
+        return health;
     }
 }

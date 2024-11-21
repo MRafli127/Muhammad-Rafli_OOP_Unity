@@ -37,6 +37,12 @@ public class PlayerMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
 
+        /* 
+        
+            This calculation is derived from physics 2d motion and I got this from:
+            https://www.youtube.com/watch?v=hG9SzQxaCm8&t=0s
+        
+         */
         moveVelocity = 2.0f * maxSpeed / timeToFullSpeed;
         moveFriction = -2.0f * maxSpeed / (timeToFullSpeed * timeToFullSpeed);
         stopFriction = -2.0f * maxSpeed / (timeToStop * timeToStop);
@@ -139,10 +145,16 @@ public class PlayerMovement : MonoBehaviour
      */
     public void MoveBound()
     {
-
+        // Converting player's position to 0 and 1
+        // relative to camera
         ppos = Camera.main.WorldToViewportPoint(transform.position);
+
+        // limit the position so that it doesnt go off screen
         ppos.x = Mathf.Clamp(ppos.x, 0.01f, 0.99f);
         ppos.y = Mathf.Clamp(ppos.y, -0.01f, 0.95f);
+
+        // Set the player's position
+        // With the converted back (viewport to world)
         transform.position = Camera.main.ViewportToWorldPoint(ppos) + new Vector3(0, 0, 10);
     }
 

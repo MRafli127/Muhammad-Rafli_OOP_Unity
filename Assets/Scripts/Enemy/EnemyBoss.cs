@@ -2,21 +2,44 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyBoss : MonoBehaviour
+public class EnemyBoss : Enemy
 {
-        public float speed = 1f;
+    [SerializeField] private float speed = 5f;
     private Vector2 screenBounds;
     private Vector2 direction;
-    private Rigidbody2D rb;
-    // Start is called before the first frame update
+    [SerializeField] private Weapon weapon;
+    
+
     void Start()
     {
-        
+        screenBounds = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, Camera.main.transform.position.z));
+        Respawn();
+        weapon = GetComponent<Weapon>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        transform.Translate(direction * speed * Time.deltaTime);
+
+        if (transform.position.x < -screenBounds.x - 1 || transform.position.x > screenBounds.x + 1)
+        {
+            Respawn();
+        }
+    }
+
+    void Respawn()
+    {
+        float spawnPositionX;
+        if (direction == Vector2.left) 
+        {
+            spawnPositionX = screenBounds.x;
+            direction = Vector2.right; 
+        }
+        else
+        {
+            spawnPositionX = -screenBounds.x;
+            direction = Vector2.left; 
+        }
+        transform.position = new Vector2(spawnPositionX, Random.Range(-screenBounds.y, screenBounds.y));
     }
 }

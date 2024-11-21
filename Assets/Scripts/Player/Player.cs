@@ -32,7 +32,7 @@ public class Player : MonoBehaviour
         playerMovement = GetComponent<PlayerMovement>();
 
         // Get Animator components
-       // animator = GameObject.Find("EngineEffects").GetComponent<Animator>();
+        animator = GameObject.Find("EngineEffects").GetComponent<Animator>();
     }
 
     // Using FixedUpdate to Move because of physics
@@ -46,16 +46,5 @@ public class Player : MonoBehaviour
     {
         playerMovement.MoveBound();
         animator.SetBool("IsMoving", playerMovement.IsMoving());
-    }
-
-    private WeaponPickup currentWeaponPickup;
-
-    public void SwitchWeapon(Weapon newWeapon, WeaponPickup newWeaponPickup)
-    {
-        if (currentWeaponPickup != null)
-        {
-            currentWeaponPickup.PickupHandler(true);  // Make the previous weapon pickup visible again
-        }
-        currentWeaponPickup = newWeaponPickup;
     }
 }

@@ -1,5 +1,6 @@
-using System.Collections;
+using System;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Pool;
 
 public class Bullet : MonoBehaviour
@@ -7,71 +8,37 @@ public class Bullet : MonoBehaviour
     [Header("Bullet Stats")]
     public float bulletSpeed = 20;
     public int damage = 10;
+
     private Rigidbody2D rb;
 
-    private IObjectPool<Bullet> objectPool;
-    public IObjectPool<Bullet> ObjectPool
-    {
-        get => objectPool;
-        set => objectPool = value;
-    }
+    public IObjectPool<Bullet> objectPool;
 
-    private Vector2 screenBounds;
-
-    void Start()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-
-        screenBounds = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, Camera.main.transform.position.z));
     }
 
-    void Update()
+    private void FixedUpdate()
     {
-
+        rb.velocity = bulletSpeed * Time.deltaTime * transform.up;
     }
 
-    IEnumerator DeactivateRoutine(float delay)
+    private void Update()
     {
-        yield return new WaitForSeconds(delay);
-        DeactivateImmediately();
-    }
+        Vector2 ppos = Camera.main.WorldToViewportPoint(transform.position);
 
-    IEnumerator CheckOutOfBounds()
-    {
-        while (true)
+        if (ppos.y >= 1.01f || ppos.y <= -0.01f && objectPool != null)
         {
-            if (transform.position.y > screenBounds.y || transform.position.y < -screenBounds.y ||
-                transform.position.x > screenBounds.x || transform.position.x < -screenBounds.x)
-            {
-                DeactivateImmediately();
-                yield break;
-            }
-
-            yield return null;
+            objectPool.Release(this);
         }
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.tag != tag)
+        if (other.gameObject.CompareTag("Enemy"))
         {
-            Debug.Log("Tag: " + tag);
-            Debug.Log("Other Tag: " + other.tag);
-            StartCoroutine(DeactivateRoutine(0.01f));
+            other.gameObject.GetComponent<HitboxComponent>().Damage(this);
+            objectPool.Release(this);
         }
-    }
-
-    public void Deactivate()
-    {
-        StartCoroutine(DeactivateRoutine(3f));
-        StartCoroutine(CheckOutOfBounds());
-    }
-
-    private void DeactivateImmediately()
-    {
-        if (rb == null) return;
-        rb.velocity = Vector2.zero;
-        rb.angularVelocity = 0f;
-        objectPool.Release(this);
     }
 }

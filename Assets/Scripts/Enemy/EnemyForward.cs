@@ -1,22 +1,28 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyForward : MonoBehaviour
+public class EnemyForwardMovement : Enemy
 {
-    public float speed = 1f;
-    private Vector2 screenBounds;
-    private Vector2 direction;
-    private Rigidbody2D rb;
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private float moveSpeed = 5f;
+
+    private void Awake()
     {
-        
+        PickRandomPositions();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+        transform.Translate(moveSpeed * Time.deltaTime * Vector2.up);
+
+        if (Camera.main.WorldToViewportPoint(new(transform.position.x, transform.position.y, transform.position.z)).y < -0.05f)
+        {
+            PickRandomPositions();
+        }
+    }
+
+    private void PickRandomPositions()
+    {
+        Vector2 randPos = new(Random.Range(0.1f, 0.99f), 1.1f);
+
+        transform.position = Camera.main.ViewportToWorldPoint(randPos) + new Vector3(0, 0, 10);
     }
 }
