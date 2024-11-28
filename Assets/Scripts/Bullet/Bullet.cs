@@ -1,6 +1,6 @@
-using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Pool;
 
 public class Bullet : MonoBehaviour
@@ -8,7 +8,6 @@ public class Bullet : MonoBehaviour
     [Header("Bullet Stats")]
     public float bulletSpeed = 20;
     public int damage = 10;
-
     private Rigidbody2D rb;
 
     public IObjectPool<Bullet> objectPool;
@@ -18,27 +17,17 @@ public class Bullet : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
     }
 
-    private void FixedUpdate()
+    IEnumerator DeactivateBullet(float delay)
     {
-        rb.velocity = bulletSpeed * Time.deltaTime * transform.up;
+        yield return new WaitForSeconds(delay);
+
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = 0f;
+        objectPool.Release(this);
     }
 
-    private void Update()
+    public void Deactivate ()
     {
-        Vector2 ppos = Camera.main.WorldToViewportPoint(transform.position);
-
-        if (ppos.y >= 1.01f || ppos.y <= -0.01f && objectPool != null)
-        {
-            objectPool.Release(this);
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.gameObject.CompareTag("Enemy"))
-        {
-            other.gameObject.GetComponent<HitboxComponent>().Damage(this);
-            objectPool.Release(this);
-        }
+        StartCoroutine(DeactivateBullet(2f));
     }
 }

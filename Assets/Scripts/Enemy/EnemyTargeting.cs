@@ -1,66 +1,56 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyTargetPlayer : Enemy
+public class EnemyTargeting : Enemy
 {
-    public float speed = 2f;
-
     private Transform player;
-    Rigidbody2D rb;
+    private Coroutine followCoroutine;
 
-    void Start()
+    protected override void Initialize()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
-        rb = GetComponent<Rigidbody2D>();
-    }
-
-    private void Awake()
-    {
-        PickRandomPositions();
-    }
-
-    void FixedUpdate()
-    {
-        if (player != null)
+        float spawnX;
+        if (Random.Range(0, 2) == 0)
         {
-            Vector2 direction = (player.position - transform.position).normalized;
-            float angle = Mathf.Atan2(direction.y, direction.x);
+            spawnX = -screenBounds.x - spriteHalfWidth;
+        }
+        else
+        {
+            spawnX = screenBounds.x + spriteHalfWidth;
+        }
+        float spawnY = Random.Range((-screenBounds.y + spriteHalfHeight)/2, screenBounds.y - spriteHalfHeight);
+        transform.position = new Vector2(spawnX, spawnY);
+        followCoroutine = StartCoroutine(FollowPlayer());
+    }
 
-            rb.rotation = angle;
-            rb.velocity = speed * Time.deltaTime * direction;
+    private IEnumerator FollowPlayer()
+    {
+        while (true)
+        {
+            if (player != null)
+            {
+                Vector2 direction = ((Vector2)player.position - (Vector2)transform.position).normalized;
+                transform.Translate((-direction) * speed * Time.deltaTime);
+            }
+            yield return null;
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (other.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player"))
         {
             Destroy(gameObject);
         }
     }
 
-    private void PickRandomPositions()
+    protected override void OnDestroy()
     {
-        Vector2 randPos;
-        Vector2 dir;
-
-        if (Random.Range(-1, 1) >= 0)
+        if (followCoroutine != null)
         {
-            dir = Vector2.right;
+            StopCoroutine(followCoroutine);
         }
-        else
-        {
-            dir = Vector2.left;
-        }
-
-        if (dir == Vector2.right)
-        {
-            randPos = new(1.1f, Random.Range(0.1f, 0.95f));
-        }
-        else
-        {
-            randPos = new(-0.01f, Random.Range(0.1f, 0.95f));
-        }
-
-        transform.position = Camera.main.ViewportToWorldPoint(randPos) + new Vector3(0, 0, 10);
+        base.OnDestroy();
     }
 }

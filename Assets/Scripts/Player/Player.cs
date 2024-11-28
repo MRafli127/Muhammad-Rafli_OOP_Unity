@@ -1,50 +1,41 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    // This for getting the instace of Player Singleton
-    public static Player Instance { get; private set; }
+    public static Player Instance;
+    private PlayerMovement playerMovement;
+    private Animator animator;
 
-    // Getting the PlayerMovement methods
-    PlayerMovement playerMovement;
-    // Animator
-    Animator animator;
-
-
-    // Key for Singleton
-    void Awake()
+    private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(this);
-            return;
-        }
-
-        Instance = this;
-
-        DontDestroyOnLoad(gameObject);
+        if (Instance != null && Instance != this) 
+        { 
+            Destroy(this); 
+        } 
+        
+        else 
+        { 
+            Instance = this; 
+        } 
     }
 
-    // Getting Component
-    void Start()
+    private void Start()
     {
-        // Get PlayerMovement components
         playerMovement = GetComponent<PlayerMovement>();
-
-        // Get Animator components
-        animator = GameObject.Find("EngineEffects").GetComponent<Animator>();
+        animator = GameObject.Find("EngineEffect").GetComponent<Animator>();
     }
 
-    // Using FixedUpdate to Move because of physics
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         playerMovement.Move();
     }
 
-    // LateUpdate for animation related
-    void LateUpdate()
+    private void LateUpdate()
     {
-        playerMovement.MoveBound();
-        animator.SetBool("IsMoving", playerMovement.IsMoving());
+        animator.SetBool("IsMoving", playerMovement.isMoving());
     }
+
+    public Weapon Weapon { get; set; }
 }

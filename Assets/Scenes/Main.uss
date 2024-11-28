@@ -1,0 +1,8 @@
+.Text {
+    font-size: 45px;
+    -unity-font: url("project://database/Assets/Scenes/SPACE.ttf?fileID=12800000&guid=3b794b009605bda4e96ecac85c9432ca&type=3#SPACE");
+    -unity-font-style: normal;
+    -unity-font-definition: initial;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-left;
+}

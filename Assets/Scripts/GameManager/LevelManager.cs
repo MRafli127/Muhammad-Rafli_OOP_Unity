@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 // Singleton
 public class LevelManager : MonoBehaviour
@@ -30,3 +31,4 @@ public class LevelManager : MonoBehaviour
         StartCoroutine(LoadSceneAsync(sceneName));
     }
 }
+    

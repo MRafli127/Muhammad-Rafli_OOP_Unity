@@ -1,0 +1,5 @@
+.Judul {
+    display: flex;
+    visibility: visible;
+    overflow: hidden;
+}

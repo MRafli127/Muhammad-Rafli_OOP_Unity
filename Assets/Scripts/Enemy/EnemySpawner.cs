@@ -1,14 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 public class EnemySpawner : MonoBehaviour
 {
     [Header("Enemy Prefabs")]
-    public Enemy spawnedEnemy;
+    public Enemy spawnedEnemy; 
 
-    [SerializeField] private int minimumKillsToIncreaseSpawnCount = 2;
+    [SerializeField] private int minimumKillsToIncreaseSpawnCount = 3;
     public int totalKill = 0;
     private int totalKillWave = 0;
 
@@ -21,49 +20,56 @@ public class EnemySpawner : MonoBehaviour
     public int multiplierIncreaseCount = 1;
 
     public CombatManager combatManager;
-    public bool isSpawning = false;
 
-    public float timer = 0;
+    public bool isSpawning = false;
 
     void Start()
     {
-        Assert.IsTrue(spawnedEnemy != null, "Tambahkan 1 Prefab Enemy terlebih dahulu!");
         spawnCount = defaultSpawnCount;
     }
 
-    private void Update()
+    public void StartSpawning()
     {
-        if (isSpawning && spawnCount > 0)
+        if (!isSpawning && spawnedEnemy.level <= combatManager.waveNumber)
         {
-            timer += Time.deltaTime;
-            if (totalKillWave >= minimumKillsToIncreaseSpawnCount)
-            {
-                defaultSpawnCount += defaultSpawnCount * spawnCountMultiplier;
-                spawnCountMultiplier += multiplierIncreaseCount;
-                totalKillWave = 0;
-            }
-            if (timer > spawnInterval)
-            {
-                spawnCount--;
-                Instantiate(spawnedEnemy);
-                timer = 0;
-            }
+            isSpawning = true;
+            StartCoroutine(SpawnEnemy());
         }
     }
 
-    public void IncreaseKillCount()
+    void StopSpawning()
+    {
+        isSpawning = false;
+        StopAllCoroutines();
+    }
+
+    IEnumerator SpawnEnemy()
+    {
+        for (int i = 0; i < spawnCount; i++)
+        {
+            if (spawnedEnemy != null)
+            {
+                Enemy enemy = Instantiate(spawnedEnemy);
+                enemy.GetComponent<Enemy>().combatManager = combatManager;
+                enemy.GetComponent<Enemy>().enemySpawner = this;
+                combatManager.totalEnemies++;
+                yield return new WaitForSeconds(spawnInterval);
+            }
+        }
+        StopSpawning();
+    }
+
+    public void OnEnemyDeath()
     {
         totalKill++;
         totalKillWave++;
-    }
 
-    public void resetSpawnCount()
-    {
-        spawnCount = defaultSpawnCount;
-    }
-
-    public void setTimerFirst()
-    {
-        timer = spawnInterval;
+        if (totalKillWave >= minimumKillsToIncreaseSpawnCount)
+        {
+            totalKillWave = 0;
+            spawnCount = defaultSpawnCount + (spawnCountMultiplier * multiplierIncreaseCount);
+            multiplierIncreaseCount++;
+        }
+        combatManager.points += spawnedEnemy.level;
     }
 }

@@ -2,44 +2,108 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyBoss : Enemy
+public class EnemyBoss : Enemy 
 {
-    [SerializeField] private float speed = 5f;
-    private Vector2 screenBounds;
-    private Vector2 direction;
-    [SerializeField] private Weapon weapon;
-    
-
-    void Start()
+    [SerializeField] Weapon weapon;
+    public Weapon Weapon { get; set; }
+    protected override void Initialize()
     {
-        screenBounds = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, Camera.main.transform.position.z));
-        Respawn();
-        weapon = GetComponent<Weapon>();
+        float spawnX;
+        if (Random.Range(0, 2) == 0)
+        {
+            spawnX = -screenBounds.x - spriteHalfWidth;
+        }
+        else
+        {
+            spawnX = screenBounds.x + spriteHalfWidth;
+        }
+        float spawnY = Random.Range(-screenBounds.y + spriteHalfHeight, screenBounds.y - spriteHalfHeight);
+        transform.position = new Vector2(spawnX, spawnY);
+        if (spawnX < 0)
+        {
+            direction = Vector2.right;
+        }
+        else
+        {
+            direction = Vector2.left;
+        }
     }
 
-    void Update()
+    protected override void Move()
     {
         transform.Translate(direction * speed * Time.deltaTime);
 
-        if (transform.position.x < -screenBounds.x - 1 || transform.position.x > screenBounds.x + 1)
+        if (transform.position.x > screenBounds.x + spriteHalfWidth || transform.position.x < -screenBounds.x - spriteHalfWidth)
         {
             Respawn();
         }
     }
 
-    void Respawn()
+    protected override void Respawn()
     {
-        float spawnPositionX;
-        if (direction == Vector2.left) 
+        float spawnX;
+        if (direction == Vector2.right)
         {
-            spawnPositionX = screenBounds.x;
-            direction = Vector2.right; 
+            spawnX = -screenBounds.x - spriteHalfWidth;
         }
         else
         {
-            spawnPositionX = -screenBounds.x;
-            direction = Vector2.left; 
+            spawnX = screenBounds.x + spriteHalfWidth;
         }
-        transform.position = new Vector2(spawnPositionX, Random.Range(-screenBounds.y, screenBounds.y));
+        float spawnY = Random.Range((-screenBounds.y + spriteHalfHeight)/2, screenBounds.y - spriteHalfHeight);
+        transform.position = new Vector2(spawnX, spawnY);
+        if (spawnX < 0)
+        {
+            direction = Vector2.right;
+        }
+        else
+        {
+            direction = Vector2.left;
+        }
+        speed = -speed; // Reverse the velocity
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+        // Ensure this code runs only once for the instantiated object
+        if (weapon != null)
+        {
+            // Deactivate all other weapons except the player's weapon
+            Weapon[] allWeapons = FindObjectsOfType<Weapon>();
+            foreach (Weapon w in allWeapons)
+            {
+                if (w != this.weapon && w.transform.parent != Player.Instance.transform)
+                {
+                    w.gameObject.SetActive(false);
+                }
+            }
+
+            if (Weapon != null)
+            {
+                Weapon.transform.SetParent(null);
+                Weapon.gameObject.SetActive(false);
+            }
+            Weapon = Instantiate(weapon, transform.position, Quaternion.identity);
+            Weapon.transform.SetParent(transform);
+            Weapon.transform.localPosition = new Vector3(0, 0, 0);
+            Weapon.shootDirection = Vector2.down; // Set shooting direction to down
+            Weapon.gameObject.SetActive(true);
+            TurnVisual(false);
+        }
+    }
+
+    void TurnVisual(bool on)
+    {
+        foreach (var component in weapon.GetComponents<Component>())
+        {
+            TurnVisual(on, weapon.GetComponent<Weapon>());
+        }   
+    }
+
+    void TurnVisual(bool on, Weapon weapon)
+    {   
+        weapon.GetComponent<SpriteRenderer>().enabled = on;
+        weapon.GetComponent<Animator>().enabled = on;
     }
 }
