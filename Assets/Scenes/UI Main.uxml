@@ -2,15 +2,13 @@
     <Style src="project://database/Assets/Scenes/Main.uss?fileID=7433441132597879392&amp;guid=b6e1cf8fa9d0f394e9e69fd33a68bbcb&amp;type=3#Main" />
     <ui:VisualElement style="flex-grow: 1; flex-direction: row; height: auto; min-height: 0; max-height: 20%;">
         <ui:VisualElement style="flex-grow: 1;">
-            <ui:Label tabindex="-1" text="Health :" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Health" class="Text" />
-            <ui:Label tabindex="-1" text="Point : " parse-escape-sequences="true" display-tooltip-when-elided="true" name="Point" class="Text" style="height: 49px; width: 316px;" />
+            <ui:Label tabindex="-1" text="Health: " parse-escape-sequences="true" display-tooltip-when-elided="true" name="Health" class="Text" style="-unity-font: url(&quot;project://database/Assets/TextMesh%20Pro/Examples%20&amp;%20Extras/Fonts/Anton.ttf?fileID=12800000&amp;guid=997a43b767814dd0a7642ec9b78cba41&amp;type=3#Anton&quot;); color: rgb(0, 255, 18);" />
+            <ui:Label tabindex="-1" text="Point: " parse-escape-sequences="true" display-tooltip-when-elided="true" name="Point" class="Text" style="-unity-font: url(&quot;project://database/Assets/TextMesh%20Pro/Examples%20&amp;%20Extras/Fonts/Anton.ttf?fileID=12800000&amp;guid=997a43b767814dd0a7642ec9b78cba41&amp;type=3#Anton&quot;); color: rgb(249, 255, 0);" />
         </ui:VisualElement>
         <ui:VisualElement style="flex-grow: 1; align-self: flex-start; justify-content: space-around; align-items: flex-end;">
-            <ui:Label tabindex="-1" text="Wave : " parse-escape-sequences="true" display-tooltip-when-elided="true" name="Wave" class="Text" />
-            <ui:Label tabindex="-1" text="Enemies Left : " parse-escape-sequences="true" display-tooltip-when-elided="true" name="EnemiesLeft" class="Text" />
+            <ui:Label tabindex="-1" text="Wave: " parse-escape-sequences="true" display-tooltip-when-elided="true" name="Wave" class="Text" style="-unity-font: url(&quot;project://database/Assets/TextMesh%20Pro/Examples%20&amp;%20Extras/Fonts/Anton.ttf?fileID=12800000&amp;guid=997a43b767814dd0a7642ec9b78cba41&amp;type=3#Anton&quot;); color: rgb(0, 255, 230);" />
+            <ui:Label tabindex="-1" text="Enemies Left: " parse-escape-sequences="true" display-tooltip-when-elided="true" name="EnemiesLeft" class="Text" style="-unity-font: url(&quot;project://database/Assets/TextMesh%20Pro/Examples%20&amp;%20Extras/Fonts/Anton.ttf?fileID=12800000&amp;guid=997a43b767814dd0a7642ec9b78cba41&amp;type=3#Anton&quot;); color: rgb(255, 0, 0);" />
         </ui:VisualElement>
     </ui:VisualElement>
-    <ui:VisualElement style="flex-grow: 1; -unity-text-align: upper-center; align-items: auto; justify-content: center; align-self: center; min-height: 0; max-height: 60%;">
-        <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Timer" class="Text" />
-    </ui:VisualElement>
+    <ui:VisualElement style="flex-grow: 1; -unity-text-align: upper-center; align-items: auto; justify-content: center; align-self: center; min-height: 0; max-height: 60%;" />
 </ui:UXML>

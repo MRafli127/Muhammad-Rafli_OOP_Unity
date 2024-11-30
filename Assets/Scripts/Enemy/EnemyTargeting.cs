@@ -2,55 +2,45 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using UnityEngine;
+
 public class EnemyTargeting : Enemy
 {
     private Transform player;
-    private Coroutine followCoroutine;
 
     protected override void Initialize()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-        float spawnX;
-        if (Random.Range(0, 2) == 0)
-        {
-            spawnX = -screenBounds.x - spriteHalfWidth;
-        }
-        else
-        {
-            spawnX = screenBounds.x + spriteHalfWidth;
-        }
-        float spawnY = Random.Range((-screenBounds.y + spriteHalfHeight)/2, screenBounds.y - spriteHalfHeight);
+        player = Player.Instance?.transform;
+
+        float spawnX = Random.Range(-screenBounds.x + spriteHalfWidth, screenBounds.x - spriteHalfWidth);
+        float spawnY = screenBounds.y + spriteHalfHeight;
+
         transform.position = new Vector2(spawnX, spawnY);
-        followCoroutine = StartCoroutine(FollowPlayer());
+        direction = Vector2.down;
     }
 
-    private IEnumerator FollowPlayer()
+    protected override void Move()
     {
-        while (true)
+        if (player != null)
         {
-            if (player != null)
-            {
-                Vector2 direction = ((Vector2)player.position - (Vector2)transform.position).normalized;
-                transform.Translate((-direction) * speed * Time.deltaTime);
-            }
-            yield return null;
+            Vector2 playerDirection = (player.position - transform.position).normalized;
+            direction = Vector2.Lerp(direction, playerDirection, Time.deltaTime).normalized;
+        }
+
+        transform.Translate(direction * speed * Time.deltaTime);
+
+        if (transform.position.y < -screenBounds.y - spriteHalfHeight)
+        {
+            Respawn();
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected override void Respawn()
     {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            Destroy(gameObject);
-        }
-    }
+        float spawnX = Random.Range(-screenBounds.x + spriteHalfWidth, screenBounds.x - spriteHalfWidth);
+        float spawnY = screenBounds.y + spriteHalfHeight;
 
-    protected override void OnDestroy()
-    {
-        if (followCoroutine != null)
-        {
-            StopCoroutine(followCoroutine);
-        }
-        base.OnDestroy();
+        transform.position = new Vector2(spawnX, spawnY);
+        direction = Vector2.down;
     }
 }

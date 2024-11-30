@@ -1,26 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class HealthComponent : MonoBehaviour
 {
-    [SerializeField] public int maxHealth;
-    [SerializeField] private int health;
+    [SerializeField] private int maxHealth;
+    private int currentHealth;
 
     void Start()
     {
-        health = maxHealth;
+        currentHealth = maxHealth;
     }
 
-    public int Health()
+    public int GetHealth()
     {
-        return health;
+        return currentHealth;
     }
 
-    public void Subtract(int amount)
+    public void SubtractHealth(int amount)
     {
-        health -= amount;
-        if (health <= 0)
+        currentHealth -= amount;
+        if (currentHealth <= 0)
         {
             Destroy(gameObject);
         }

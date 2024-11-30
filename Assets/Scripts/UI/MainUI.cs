@@ -1,13 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class MainUI : MonoBehaviour
 {
-    private VisualElement rootUI;
+    private VisualElement uiRoot;
     private CombatManager combatManager;
     private HealthComponent healthComponent;
+
     private Label waveLabel;
     private Label pointsLabel;
     private Label enemiesLeftLabel;
@@ -16,77 +15,94 @@ public class MainUI : MonoBehaviour
 
     void Start()
     {
-        InitializeUI();
-        UpdateUI();
-    }
-
-    private void InitializeUI()
-    {
-        // Retrieve root UI element and components
-        rootUI = GetComponent<UIDocument>()?.rootVisualElement;
+        // Initialize UI and game components
+        uiRoot = GetComponent<UIDocument>()?.rootVisualElement;
         combatManager = FindObjectOfType<CombatManager>();
         healthComponent = FindObjectOfType<HealthComponent>();
 
-        if (rootUI != null)
+        // Initialize UI elements if uiRoot is not null
+        if (uiRoot != null)
         {
-            // Initialize UI elements
-            waveLabel = rootUI.Q<Label>("Wave");
-            pointsLabel = rootUI.Q<Label>("Point");
-            enemiesLeftLabel = rootUI.Q<Label>("EnemiesLeft");
-            timerLabel = rootUI.Q<Label>("Timer");
-            healthLabel = rootUI.Q<Label>("Health");
+            waveLabel = uiRoot.Q<Label>("Wave");
+            pointsLabel = uiRoot.Q<Label>("Point");
+            enemiesLeftLabel = uiRoot.Q<Label>("EnemiesLeft");
+            timerLabel = uiRoot.Q<Label>("Timer");
+            healthLabel = uiRoot.Q<Label>("Health");
         }
+
+        UpdateUI(); // Initial UI update
     }
 
     public void UpdateUI()
     {
-        if (combatManager == null || healthComponent == null)
-            return;
+        // Ensure required components are present
+        if (combatManager == null || healthComponent == null || uiRoot == null) return;
 
-        int playerHealth = healthComponent.Health();
+        // Update individual UI elements
+        UpdateWave();
+        UpdatePoints();
+        UpdateEnemiesLeft();
+        UpdateTimer();
+        UpdateHealth();
+    }
 
-        // Update Wave
+    private void UpdateWave()
+    {
         waveLabel?.SetText($"Wave: {combatManager.waveNumber}");
+    }
 
-        // Update Points
+    private void UpdatePoints()
+    {
         pointsLabel?.SetText($"Points: {combatManager.points}");
+    }
 
-        // Update Enemies Left
+    private void UpdateEnemiesLeft()
+    {
         enemiesLeftLabel?.SetText($"Enemies Left: {combatManager.totalEnemies}");
+    }
 
-        // Update Timer
-        if (timerLabel != null)
-        {
-            timerLabel.text = combatManager.timer > 0
-                ? $"Next Wave in: {(int)(combatManager.GetWaveInterval() - combatManager.timer + 1)}"
-                : null;
-        }
+    private void UpdateTimer()
+    {
+        if (timerLabel == null) return;
 
-        // Update Health
-        if (playerHealth > 0)
+        if (combatManager.timer > 0)
         {
-            healthLabel?.SetText($"Health: {playerHealth}");
+            int timeLeft = Mathf.Max(0, (int)(combatManager.GetWaveInterval() - combatManager.timer + 1));
+            timerLabel.SetText($"Next Wave in: {timeLeft}");
         }
         else
         {
-            ClearUIOnGameOver();
+            timerLabel.SetText(string.Empty);
         }
     }
 
-    private void ClearUIOnGameOver()
+    private void UpdateHealth()
     {
-        healthLabel?.SetText(null);
-        waveLabel?.SetText(null);
-        pointsLabel?.SetText(null);
-        enemiesLeftLabel?.SetText(null);
-        if (timerLabel != null)
+        if (healthLabel == null) return;
+
+        int playerHealth = healthComponent.GetHealth();
+
+        if (playerHealth > 0)
         {
-            timerLabel.text = $"Game Over!\nYour Points: {combatManager.points}";
+            healthLabel.SetText($"Health: {playerHealth}");
         }
+        else
+        {
+            DisplayGameOverUI();
+        }
+    }
+
+    private void DisplayGameOverUI()
+    {
+        healthLabel.SetText(string.Empty);
+        waveLabel?.SetText(string.Empty);
+        pointsLabel?.SetText(string.Empty);
+        enemiesLeftLabel?.SetText(string.Empty);
+        timerLabel?.SetText($"Game Over!\nYour Points: {combatManager.points}");
     }
 }
 
-// Extension method for Label to simplify setting text
+// Extension Method for Label to Set Text
 public static class LabelExtensions
 {
     public static void SetText(this Label label, string text)

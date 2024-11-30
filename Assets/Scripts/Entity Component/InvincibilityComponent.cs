@@ -1,47 +1,47 @@
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(SpriteRenderer)), RequireComponent(typeof(HitboxComponent))]
 public class InvincibilityComponent : MonoBehaviour
 {
-    [SerializeField] private int blinkingCount = 7;
+    [SerializeField] private int blinkCount = 3;
     [SerializeField] private float blinkInterval = 0.1f;
     [SerializeField] private Material blinkMaterial;
 
     private SpriteRenderer spriteRenderer;
     private Material originalMaterial;
-
     public bool isInvincible = false;
 
-    // Start is called before the first frame update
-    private void Awake()
+    void Start()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        originalMaterial = spriteRenderer.material;
+        // Get the sprite renderer from the correct object
+        spriteRenderer = (gameObject.CompareTag("Player") && GameObject.Find("Ship") != null)
+            ? GameObject.Find("Ship").GetComponent<SpriteRenderer>()
+            : GetComponent<SpriteRenderer>();
+
+        if (spriteRenderer != null)
+        {
+            originalMaterial = spriteRenderer.material;
+        }
     }
 
     public void TriggerInvincibility()
     {
-        if (!isInvincible)
+        if (!isInvincible && spriteRenderer != null)
         {
-            StartCoroutine(InvincibilityCoroutine());
+            StartCoroutine(BlinkEffect());
         }
     }
 
-    private IEnumerator InvincibilityCoroutine()
+    private IEnumerator BlinkEffect()
     {
         isInvincible = true;
-
-        for (int i = 0; i < blinkingCount; i++)
+        for (int i = 0; i < blinkCount; i++)
         {
             spriteRenderer.material = blinkMaterial;
-            yield return new WaitForSeconds(blinkInterval / 2);
+            yield return new WaitForSeconds(blinkInterval);
             spriteRenderer.material = originalMaterial;
-            yield return new WaitForSeconds(blinkInterval / 2);
+            yield return new WaitForSeconds(blinkInterval);
         }
-
-        spriteRenderer.material = originalMaterial;
-
         isInvincible = false;
     }
 }
